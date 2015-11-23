@@ -3,6 +3,8 @@ package spriter.definitions;
 import openfl.geom.Point;
 #elseif flambe
 import flambe.math.Point;
+#else
+import spriter.util.Point;
 #end
 
 /**
@@ -16,7 +18,7 @@ class Quadrilateral
 	public var p2:Point;
 	public var p3:Point;
 	public var p4:Point;
-	public function new(p1:Point, p2:Point, p3:Point, p4:Point) 
+	public function new(p1:Point, p2:Point, p3:Point, p4:Point)
 	{
 		this.p1 = p1;
 		this.p2 = p2;

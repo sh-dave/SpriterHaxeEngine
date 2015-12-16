@@ -48,7 +48,7 @@ class KhaPunkLibrary extends spriter.library.AbstractLibrary {
 */
 
 	override public function addGraphic( name : String, info : SpatialInfo, pivots : PivotInfo ) {
-		var texture = kha.Loader.the.getImage('entities/player1/${name}');
+		var texture = kha.Loader.the.getImage('${_basePath}/${name});
 		var image = new com.khapunk.graphics.PunkImage(texture);
 
 		var spatialResult : SpatialInfo = compute(info, pivots, texture.width, texture.height);

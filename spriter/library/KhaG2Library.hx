@@ -51,8 +51,8 @@ class KhaG2Library extends spriter.library.AbstractLibrary {
 			x : spatialResult.x,
 			y : spatialResult.y,
 			angle : SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle)),
-			originX : 0,
-			originY : 0,
+			originX : pivots.pivotX,
+			originY : pivots.pivotY,
 			scaleX : spatialResult.scaleX,
 			scaleY : spatialResult.scaleY,
 			alpha : spatialResult.a,
@@ -67,7 +67,7 @@ class KhaG2Library extends spriter.library.AbstractLibrary {
 			g.drawScaledSubImage(
 				part.asset.image,
 				part.asset.region.x, part.asset.region.y, part.asset.region.w, part.asset.region.h,
-				part.x, part.y, part.asset.region.w, part.asset.region.h
+				part.x + part.originX, part.y + part.originY, part.asset.region.w * part.scaleX, part.asset.region.h * part.scaleY
 			);
 
 			//g.drawImage(part.image, part.x, part.y);

@@ -4,13 +4,34 @@ import spriter.definitions.PivotInfo;
 import spriter.definitions.SpatialInfo;
 import spriter.util.SpriterUtil;
 
-/*
-	(DK) TODO
-		- assets/image provider
-*/
+class Rectangle {
+	public var x : Float;
+	public var y : Float;
+	public var w : Float;
+	public var h : Float;
+
+	public function new( ?x = 0.0, ?y = 0.0, ?w = 0.0, ?h = 0.0 ) {
+		this.x = x;
+		this.y = y;
+		this.w = w;
+		this.h = h;
+	}
+}
+
+typedef TextureAsset = {
+	var image : kha.Image;
+	var region : Rectangle;
+}
+
+typedef AssetProvider = {
+	function getAsset( id : String ) : TextureAsset;
+}
+
 class KhaG2Library extends spriter.library.AbstractLibrary {
-	public function new( basepath : String ) {
-		super(basepath);
+	public function new( assetProvider : AssetProvider ) {
+		super(null);
+
+		this.assetProvider = assetProvider;
 	}
 
 	override public function clear() {
@@ -18,23 +39,20 @@ class KhaG2Library extends spriter.library.AbstractLibrary {
 	}
 
 	override public function addGraphic( name : String, info : SpatialInfo, pivots : PivotInfo ) {
-		var graphic = '${_basePath}/${name}';
-		var fixed = KhaTools.fixAssetId(graphic);
-
-		if (!imageCache.exists(fixed)) {
-			imageCache.set(fixed, Reflect.field(kha.Assets.images, fixed));
+		if (!textureAssetCache.exists(name)) {
+			textureAssetCache.set(name, assetProvider.getAsset(name));
 		}
 
-		var image = imageCache.get(fixed);
-		var spatialResult : SpatialInfo = compute(info, pivots, image.width, image.height);
+		var asset = textureAssetCache.get(name);
+		var spatialResult : SpatialInfo = compute(info, pivots, asset.region.w, asset.region.h);
 
 		parts.push({
+			asset : asset,
 			x : spatialResult.x,
 			y : spatialResult.y,
 			angle : SpriterUtil.toRadians(SpriterUtil.fixRotation(spatialResult.angle)),
 			originX : 0,
 			originY : 0,
-			image : image,
 			scaleX : spatialResult.scaleX,
 			scaleY : spatialResult.scaleY,
 			alpha : spatialResult.a,
@@ -46,18 +64,26 @@ class KhaG2Library extends spriter.library.AbstractLibrary {
 		for (part in parts) {
 			g.pushRotation(part.angle, part.x + part.originX, part.y + part.originY);
 			g.pushOpacity(part.alpha);
-			g.drawImage(part.image, part.x, part.y);
+			g.drawScaledSubImage(
+				part.asset.image,
+				part.asset.region.x, part.asset.region.y, part.asset.region.w, part.asset.region.h,
+				part.x, part.y, part.asset.region.w, part.asset.region.h
+			);
+
+			//g.drawImage(part.image, part.x, part.y);
+
 			g.popOpacity();
 			g.popTransformation();
 		}
 	}
 
-	var imageCache = new Map<String, kha.Image>();
+	var assetProvider : AssetProvider;
+	var textureAssetCache = new Map<String, TextureAsset>();
 	var parts = new Array<Part>();
 }
 
 private typedef Part = {
-	var image : kha.Image;
+	var asset : TextureAsset;
 
 	var x : Float;
 	var y : Float;
